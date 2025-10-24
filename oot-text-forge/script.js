@@ -142,62 +142,113 @@ function makeItalics(matched,p1,offset,string){
   return "<i>" + p1 + "</i>";
 }
 function boxBreak(matched,offset,string){
-    return "<br><br><div class=\"boxbreak\">";
+    return `<div class="boxbreak">`;
 }
 function codeToIcon(matched,p1,offset,string){
   var n = parseInt(p1, 16);
   console.log(p1);
   return iconMap[n];
 }
+
+const colorMap = {
+    BL: 'BLACK',
+    R: 'RED',
+    G: 'ADJUSTABLE',
+    B: 'BLUE',
+    L: 'LIGHTBLUE',
+    P: 'PURPLE',
+    Y: 'YELLOW',
+    W: 'DEFAULT',
+    TOK: 'TOK',
+    LYN: 'LYN',
+    IGA: 'IGA',
+    OKO: 'OKO',
+    RAINBOW: 'RAINBOW',
+    GR: 'GREY',
+    PLAYER: 'PLAYER',
+    O: 'ORANGE',
+};
+
+// Replace $CODE → COLOR(NAME)
+function expandColors(text) {
+    text = String(text ?? ''); // ensures it's a string
+    return text.replace(/\$[A-Z]+/gi, match => {
+        const key = match.slice(1).toUpperCase();
+        return colorMap[key] ? `COLOR(${colorMap[key]})` : match;
+    });
+}
+
+// Replace COLOR(NAME) → $CODE
+function compressColors(text) {
+    text = String(text ?? ''); // ensures it's a string
+    return text.replace(/COLOR\(([A-Z]+)\)/gi, (_, name) => {
+        const entry = Object.entries(colorMap).find(([k, v]) => v === name.toUpperCase());
+        return entry ? `$${entry[0]}` : `COLOR(${name})`;
+    });
+}
+
 function updateText(){
-  codeToScript();
-  if(input.value)
-    document.getElementById("output").innerHTML = input.value;
-  //input.value = input.value.replace(/\n/g, '');
-  document.getElementById("output").innerHTML = input.value.replace(/TWO_CHOICE|PERSISTENT|\\n/gi, function(matched){return mapObj[matched]})
-    .replace(/\n/g, '')
-    .replace(/\s*BOX_BREAK_DELAYED\(.*?\)\s*/gi, boxBreak)
-    .replace(/\s*BOX_BREAK\s*/gi, boxBreak)
-    .replace(/\s*COLOR\(RED\)\s*/gi, '<a style=\'color:red\'>')
-    .replace(/\s*COLOR\(DEFAULT\)\s*/gi, '<a style=\'color:white\'>')
-    .replace(/\s*COLOR\(ADJUSTABLE\)\s*/gi, '<a style=\'color:lightgreen\'>')
-    .replace(/\s*COLOR\(BLUE\)\s*/gi, '<a style=\'color:blue\'>')
-    .replace(/\s*COLOR\(LIGHTBLUE\)\s*/gi, '<a style=\'color:lightblue\'>')
-    .replace(/\s*COLOR\(PURPLE\)\s*/gi, '<a style=\'color:pink\'>')
-    .replace(/\s*COLOR\(YELLOW\)\s*/gi, '<a style=\'color:yellow\'>')
-    .replace(/\s*COLOR\(BLACK\)\s*/gi, '<a style=\'color:black\'>')
-    .replace(/DEFINE_MESSAGE\(.*? /gi, '')
-    .replace(/\s*QUICKTEXT_ENABLE\s*/gi,'')
-    .replace(/\s*QUICKTEXT_DISABLE\s*/gi,'')
-    .replace(/\s*UNSKIPPABLE\s*/gi,'')
-    .replace(/\s*EVENT\s*/gi,'')
-    .replace(/\s*SFX\(.*?\)\s*/gi,'')
-    .replace(/\s*TEXTBOX_TYPE_BLACK,\s*/gi, '<div id="TEXTBOX_TYPE_BLACK"></div>')
-    .replace(/\s*TEXTBOX_TYPE_BLUE,\s*/gi, '<div id="TEXTBOX_TYPE_BLUE"></div>')
-    .replace(/\s*TEXTBOX_POS_TOP,\s*/gi, '<div id="TEXTBOX_POS_TOP"></div>')
-    .replace(/\s*TEXTBOX_POS_MIDDLE,\s*/gi, '<div id="TEXTBOX_POS_MIDDLE"></div>')
-    .replace(/\s*TEXTBOX_POS_BOTTOM,\s*/gi, '<div id="TEXTBOX_POS_BOTTOM"></div>')
-    .replace(/\s*TEXTBOX_POS_VARIABLE\s*,/gi, '<div id="TEXTBOX_POS_VARIABLE"></div>')
-    .replace(/\s*ITEM_ICON\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)\s*/gi, codeToIcon)
-    .replace(/\s*SHIFT\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)\s*/gi, replaceShift)
-    .replace(/\\(.*?)\\/gi, makeItalics)
-    .replace(/\"/g, '')
- .replace(/\[C-Left\]|\[C-Right\]|\[C-Up\]|\[C-Down\]|\[A\]/gi, function(matched){return buttonMap[matched]});
-  if($("#TEXTBOX_TYPE_BLACK").length){
-    $("#output").css("background-color", "rgb\(85 85 85 \/10\%\)");
-  }
-  else if($("#TEXTBOX_TYPE_BLUE").length){
-    $("#output").css("background-color", "rgb\(0 0 136 \/10\%\)");
-  }
-  if($("#TEXTBOX_POS_TOP").length){
-    $("#output").css("border-top", "2px solid white");
-  }
-  else if($("#TEXTBOX_POS_MIDDLE").length){
-    $("#output").css("border-right", "2px solid white");
-  }
-  else if($("#TEXTBOX_POS_BOTTOM").length){
-    $("#output").css("border-bottom", "2px solid white");
-  }
+    codeToScript();
+    if(input.value)
+        document.getElementById("output").innerHTML = input.value;
+
+    const val = input.value.replace(/TWO_CHOICE|PERSISTENT|\\n/gi, function(matched){return mapObj[matched]})
+        .replace(/\n/g, '')
+        .replace(/\s*BOX_BREAK_DELAYED\(.*?\)\s*/gi, boxBreak)
+        .replace(/\s*BOX_BREAK\s*/gi, boxBreak)
+        .replace(/\s*COLOR\(RED\)\s*/gi, '<a style=\'color:red\'>')
+        .replace(/\s*COLOR\(DEFAULT\)\s*/gi, '<a style=\'color:white\'>')
+        .replace(/\s*COLOR\(ADJUSTABLE\)\s*/gi, '<a style=\'color:lightgreen\'>')
+        .replace(/\s*COLOR\(BLUE\)\s*/gi, '<a style=\'color:blue\'>')
+        .replace(/\s*COLOR\(LIGHTBLUE\)\s*/gi, '<a style=\'color:lightblue\'>')
+        .replace(/\s*COLOR\(PURPLE\)\s*/gi, '<a style=\'color:pink\'>')
+        .replace(/\s*COLOR\(YELLOW\)\s*/gi, '<a style=\'color:yellow\'>')
+        .replace(/\s*COLOR\(BLACK\)\s*/gi, '<a style=\'color:black\'>')
+
+        .replace(/\s*COLOR\(TOK\)\s*/gi, '<a style=\'color:#8aeb44\'>')
+        .replace(/\s*COLOR\(LYN\)\s*/gi, '<a style=\'color:#e03a64\'>')
+        .replace(/\s*COLOR\(IGA\)\s*/gi, '<a style=\'color:#a94deb\'>')
+        .replace(/\s*COLOR\(OKO\)\s*/gi, '<a style=\'color:#7df0c4\'>')
+        .replace(/\s*COLOR\(RAINBOW\)\s*/gi, '<a class=\'rainbow-text\'>')
+        .replace(/\s*COLOR\(GREY\)\s*/gi, '<a style=\'color:#4a4a4a\'>')
+        .replace(/\s*COLOR\(PLAYER\)\s*/gi, '<a style=\'color:#ded649\'>')
+        .replace(/\s*COLOR\(ORANGE\)\s*/gi, '<a style=\'color:#ffd500\'>')
+
+        .replace(/DEFINE_MESSAGE\(.*? /gi, '')
+        .replace(/\s*QUICKTEXT_ENABLE\s*/gi,'')
+        .replace(/\s*QUICKTEXT_DISABLE\s*/gi,'')
+        .replace(/\s*UNSKIPPABLE\s*/gi,'')
+        .replace(/\s*EVENT\s*/gi,'')
+        .replace(/\s*SFX\(.*?\)\s*/gi,'')
+        .replace(/\s*TEXTBOX_TYPE_BLACK,\s*/gi, '<div id="TEXTBOX_TYPE_BLACK"></div>')
+        .replace(/\s*TEXTBOX_TYPE_BLUE,\s*/gi, '<div id="TEXTBOX_TYPE_BLUE"></div>')
+        .replace(/\s*TEXTBOX_POS_TOP,\s*/gi, '<div id="TEXTBOX_POS_TOP"></div>')
+        .replace(/\s*TEXTBOX_POS_MIDDLE,\s*/gi, '<div id="TEXTBOX_POS_MIDDLE"></div>')
+        .replace(/\s*TEXTBOX_POS_BOTTOM,\s*/gi, '<div id="TEXTBOX_POS_BOTTOM"></div>')
+        .replace(/\s*TEXTBOX_POS_VARIABLE\s*,/gi, '<div id="TEXTBOX_POS_VARIABLE"></div>')
+        .replace(/\s*ITEM_ICON\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)\s*/gi, codeToIcon)
+        .replace(/\s*SHIFT\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)\s*/gi, replaceShift)
+        .replace(/\\(.*?)\\/gi, makeItalics)
+        .replace(/\"/g, '')
+        .replace(/\[C-Left\]|\[C-Right\]|\[C-Up\]|\[C-Down\]|\[A\]/gi, function(matched){return buttonMap[matched]});
+
+    document.getElementById("output").innerHTML = val;
+
+    if($("#TEXTBOX_TYPE_BLACK").length){
+        $("#output").css("background-color", "rgb\(85 85 85 \/10\%\)");
+    }
+    else if($("#TEXTBOX_TYPE_BLUE").length){
+        $("#output").css("background-color", "rgb\(0 0 136 \/10\%\)");
+    }
+    if($("#TEXTBOX_POS_TOP").length){
+        $("#output").css("border-top", "2px solid white");
+    }
+    else if($("#TEXTBOX_POS_MIDDLE").length){
+        $("#output").css("border-right", "2px solid white");
+    }
+    else if($("#TEXTBOX_POS_BOTTOM").length){
+        $("#output").css("border-bottom", "2px solid white");
+    }
 }
 function addQuotes(match, p1, offset, string){
   
@@ -211,19 +262,16 @@ function shiftTag(match, p1, offset, string){
 function sfxTag(match, p1, offset, string){
   return "SFX\(\"\\x" + p1 + "\"\)";
 }
+
 function updateEditText(){
   var scriptInput = document.getElementById("otherinput");
   var codeOutput = document.getElementById("codeoutput");
-  codeOutput.value = scriptInput.value
-  .replace(/#B\n/g, 'BOX_BREAK ')
-    .replace(/\$BL/g, 'COLOR\(BLACK\)')
-    .replace(/\$R/g, 'COLOR\(RED\)')
-    .replace(/\$G/g, 'COLOR\(ADJUSTABLE\)')
-    .replace(/\$B/g, 'COLOR\(BLUE\)')
-    .replace(/\$L/g, 'COLOR\(LIGHTBLUE\)')
-    .replace(/\$P/g, 'COLOR\(PURPLE\)')
-    .replace(/\$Y/g, 'COLOR\(YELLOW\)')
-    .replace(/\$W/g, 'COLOR\(DEFAULT\)')
+
+  var text = expandColors(scriptInput.value);
+  console.log(text);
+
+  codeOutput.value = text
+    .replace(/#B\n/g, 'BOX_BREAK ')
     .replace(/\#QE/g, 'QUICKTEXT_ENABLE')
     .replace(/\#QD/g, 'QUICKTEXT_DISABLE')
     .replace(/\#PE/g, 'PERSISTENT')
@@ -237,29 +285,26 @@ function updateEditText(){
     .replace(/\n/g, '\"\\n\"')
     updateText();
 }
+
 function codeToScript(){
-  var codeInput = document.getElementById("codeoutput");
-  var scriptOutput = document.getElementById("otherinput");
-  scriptOutput.value = codeInput.value
-    .replace(/COLOR\(RED\)/gi, '$R')
-    .replace(/COLOR\(DEFAULT\)/gi, '$W')
-    .replace(/COLOR\(ADJUSTABLE\)/gi, '$G')
-    .replace(/COLOR\(BLACK\)/gi, '$BL')
-    .replace(/COLOR\(BLUE\)/gi, '$B')
-    .replace(/COLOR\(LIGHTBLUE\)/gi, '$L')
-    .replace(/COLOR\(PURPLE\)/gi, '$P')
-    .replace(/COLOR\(YELLOW\)/gi, '$Y')
-    .replace(/UNSKIPPABLE/gi, '#U')
-    .replace(/EVENT/gi, '#E')
-    .replace(/BOX_BREAK /gi, '#B\n')
-    .replace(/QUICKTEXT_ENABLE/g, '#QE')
-    .replace(/QUICKTEXT_DISABLE/g, '#QD')
-    .replace(/PERSISTENT/g, '#PE')
-    .replace(/ITEM_ICON\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)/g, '#I $1')
-    .replace(/SFX\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)/g, '#SFX $1')
-    .replace(/SHIFT\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)/g, '#S $1')
-    .replace(/\"\\n\"/g, '\n')
+    var codeInput = document.getElementById("codeoutput");
+    var scriptOutput = document.getElementById("otherinput");
+
+    var text = compressColors(codeInput.value);
+
+    scriptOutput.value = text
+        .replace(/UNSKIPPABLE/gi, '#U')
+        .replace(/EVENT/gi, '#E')
+        .replace(/BOX_BREAK /gi, '#B\n')
+        .replace(/QUICKTEXT_ENABLE/g, '#QE')
+        .replace(/QUICKTEXT_DISABLE/g, '#QD')
+        .replace(/PERSISTENT/g, '#PE')
+        .replace(/ITEM_ICON\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)/g, '#I $1')
+        .replace(/SFX\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)/g, '#SFX $1')
+        .replace(/SHIFT\(\"\\x([a-fA-F0-9][a-fA-F0-9])\"\)/g, '#S $1')
+        .replace(/\"\\n\"/g, '\n')
 }
+
 function defMsg(){
   var textId = document.getElementById("textid");
   var type = document.getElementById("boxtype");

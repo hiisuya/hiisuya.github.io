@@ -80,7 +80,7 @@ body{
 }
 
 #otherinput{
-  bottom: 140px;
+  bottom: 30px;
   left: 20px;
   font-family: "RocknRoll One", sans-serif;
   vertical-align: top;
@@ -98,8 +98,8 @@ body{
   padding-top: 14px;
   position: fixed;
   text-wrap: nowrap;
-  max-height: 200px;
-  height: 180px;
+  max-height: 300px;
+  height: 300px;
   width: 700px;
   background-color: #555;
   border-radius: 20px;
@@ -285,46 +285,79 @@ textarea:focus{
   height: 64px;
 }
 #output {
-  vertical-align: top;
-  text-align: center;
-  line-height: 24px;
-  font-size: 20px;
-  font-family: "RocknRoll One", sans-serif;
-  color: white;
-  text-align: left;
-  padding-top: 20px;
-  padding-left: 50px;
-  white-space: pre-wrap;
-  word-spacing: 3px;
-  padding-left: 64px;
-  padding-right: 42px;
-  padding-bottom: 8px;
-  padding-top: 14px;
-  margin-left: 48px;
-  position: absolute;
-  text-wrap: nowrap;
+    vertical-align: top;
+    text-align: center;
+    line-height: 24px;
+    font-size: 20px;
+    font-family: "RocknRoll One", sans-serif;
+    color: white;
+    text-align: left;
+    padding-top: 20px;
+    padding-left: 50px;
+    white-space: pre-wrap;
+    word-spacing: 3px;
+    padding-left: 64px;
+    padding-right: 42px;
+    padding-bottom: 14px;
+    padding-top: 14px;
+    margin-left: 48px;
+    position: absolute;
+    text-wrap: nowrap;
 }
+
 #output a{
   padding-top: 10px;
 }
+
 #arrow{
   margin-left:-24px;
 }
+
 .boxbreak{
-  display: inline-block;
-  overflow: visible;
-  width: 400px;
-  height: 90px;
-  background-color: rgb(85 85 85 / 20%);
-  border-radius: 20px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  padding-top: 10px;
-  padding-left: 52px;
-  padding-bottom: 24px;
-  text-align: center;
-  font-size: 18px;
-  font-family: "RocknRoll One", sans-serif;
-  text-align: left;
-  white-space: pre-wrap;
-  margin-left: -4rem;
+    /* display: inline-block;
+    overflow: visible;
+    width: 400px;
+    height: 90px;
+    background-color: rgb(85 85 85 / 20%);
+    border-radius: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding-top: 10px;
+    padding-left: 52px;
+    padding-bottom: 24px;
+    text-align: center;
+    font-size: 18px;
+    font-family: "RocknRoll One", sans-serif;
+    text-align: left;
+    white-space: pre-wrap; */
+    vertical-align: top;
+    text-align: center;
+    line-height: 24px;
+    font-size: 20px;
+    font-family: "RocknRoll One", sans-serif;
+    color: white;
+    text-align: left;
+    padding-top: 20px;
+    padding-left: 50px;
+    white-space: pre-wrap;
+    word-spacing: 3px;
+    padding-left: 64px;
+    padding-right: 42px;
+    padding-bottom: 14px;
+    padding-top: 14px;
+    position: absolute;
+    text-wrap: nowrap;
+    height: 97px;
+    width: 410px;
+    background-color: #555;
+    display: inline-block;
+    border-radius: 20px;
+    left: 0rem;
+    top: 8.5rem;
+}
+
+.rainbow-text {
+    background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+    -webkit-background-clip: text; /* For Webkit browsers */
+    background-clip: text;
+    color: transparent;
 }
