@@ -1,7 +1,7 @@
-@import url('https://cdn.jsdelivr.net/gh/ngarces/FE15-Text-Simulator/FOT-ChiaroStd-B.otf');
+@import url('https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap');
 @font-face {
     font-family: fot-chiaro_stdb;
-    src: url('https://cdn.jsdelivr.net/gh/ngarces/FE15-Text-Simulator/FOT-ChiaroStd-B.otf') format("opentype");
+    src: url('https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap') format("opentype");
 }
 body{
   background-color: #111;
