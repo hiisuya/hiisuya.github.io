@@ -80,7 +80,7 @@ body {
 }
 
 #otherinput {
-    bottom: 30px;
+    bottom: 20px;
     left: 20px;
     font-family: "RocknRoll One", sans-serif;
     vertical-align: top;
@@ -100,7 +100,7 @@ body {
     text-wrap: nowrap;
     max-height: 300px;
     height: 300px;
-    width: 700px;
+    width: 1200px;
     background-color: #555;
     border-radius: 20px;
 }
@@ -111,7 +111,7 @@ body {
 }
 
 #codeoutput {
-    bottom: 40px;
+    bottom: 20px;
     right: 64px;
     vertical-align: top;
     text-align: center;
@@ -145,22 +145,23 @@ body {
 }
 
 #commandListWindow {
-    top: 0;
-    left: 0;
+    position: absolute;
+    display: inline-block;
+    top: 8px;
+    right: 64px;
     background-color: #333;
     color: white;
-    display: none;
-    font-family: 'fot-chiaro_stdb';
-    font-size: 14px;
-    max-width: 600px;
-    max-height: 600px;
+    font-family: "RocknRoll One", sans-serif;
+
     vertical-align: top;
     padding-top: 0px;
     padding-left: 5px;
     padding-right: 8px;
     border-radius: 15px;
     overflow: auto;
-    position: relative;
+    font-size: 14px;
+    max-width: 600px;
+    max-height: 450px;
     z-index: 10;
 }
 
@@ -227,7 +228,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 0px;
 }
 
 ::-webkit-scrollbar-track {
