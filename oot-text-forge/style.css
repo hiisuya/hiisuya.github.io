@@ -30,7 +30,7 @@ body {
 
 #copybutton {
     right: 330px;
-    bottom: 395px;
+    bottom: 330px;
     color: white;
     background-color: black;
     font-family: "RocknRoll One", sans-serif;
@@ -112,7 +112,7 @@ body {
 
 #codeoutput {
     bottom: 20px;
-    right: 64px;
+    right: 20px;
     vertical-align: top;
     text-align: center;
     line-height: 28px;
@@ -127,12 +127,10 @@ body {
     position: fixed;
     text-wrap: nowrap;
     height: 300px;
-    width: 612px;
+    width: 660px;
     background-color: #555;
     display: inline-block;
     border-radius: 20px;
-    border-top-right-radius: 0px;
-    border-top-left-radius: 0px;
 }
 
 .inputrectangle {
@@ -148,20 +146,18 @@ body {
     position: absolute;
     display: inline-block;
     top: 8px;
-    right: 64px;
+    right: 20px;
     background-color: #333;
     color: white;
     font-family: "RocknRoll One", sans-serif;
-
     vertical-align: top;
+    padding: 20px;
     padding-top: 0px;
-    padding-left: 5px;
-    padding-right: 8px;
     border-radius: 15px;
     overflow: auto;
     font-size: 14px;
-    max-width: 600px;
-    max-height: 450px;
+    max-width: 620px;
+    max-height: 515px;
     z-index: 10;
 }
 
@@ -323,7 +319,8 @@ textarea:focus {
     padding-right: 42px;
     padding-bottom: 14px;
     padding-top: 14px;
-    margin-left: 48px;
+    /* margin-left: 10px; */
+    left: 20px;
     position: absolute;
     text-wrap: nowrap;
 }

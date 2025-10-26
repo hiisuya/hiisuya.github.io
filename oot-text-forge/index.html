@@ -53,22 +53,7 @@
         </div>
         <div id="outputcollection">
             <button id="copybutton" onclick="copyToClipboard()">Copy code</button>
-            <div id="inputdiv">
-                <input type="text" id="textid" maxlength="6" placeholder="0x????" onkeyup="defMsg()">
-                <select class="selectbox" onchange="defMsg()" id="boxtype">Text box type
-                <option value="black">Black</option>
-                <option value="blue">Blue</option>
-                <option value="wooden">Wooden</option>
-                </select>
-                <select class="selectbox" onchange="defMsg()" id="boxpos">Text box type
-                <option value="top">Top</option>
-                <option value="middle">Middle</option>
-                <option value="bottom">Bottom</option>
-                <option value="variable">Variable</option>
-                </select>
-            </div>
             <textarea id="codeoutput" placeholder="Code input/output" onkeyup=""></textarea>
-            <div class="rectangle" id="defineoutput"></div>
         </div>
         <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
         <script src="script.js"></script>
