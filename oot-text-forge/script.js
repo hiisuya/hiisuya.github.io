@@ -114,6 +114,9 @@ var buttonMap = {
     "\[C-Right\]": "►"
 };
 
+
+var scriptBuffer = "";
+
 function toggleCommandList() {
     var div = document.getElementById("infowindow");
     if (div.style.display == "none") {
@@ -204,22 +207,36 @@ const colorMap = {
     GR: 'GREY',
     PLAYER: 'PLAYER',
     O: 'ORANGE',
+    HP: 'HEXCOLOR_HOT_PINK'
 };
 
 function expandColors(text) {
     text = String(text ?? '');
     return text.replace(/\$[A-Z]+/gi, match => {
         const key = match.slice(1).toUpperCase();
+
+        if (colorMap[key] && colorMap[key].match("HEXCOLOR")) {
+            return `CUSTOM(CUSTOM_HEXCOLOR, ${colorMap[key]})`
+        }
+
         return colorMap[key] ? `COLOR(${colorMap[key]})` : match;
     });
 }
 
 function compressColors(text) {
     text = String(text ?? '');
-    return text.replace(/COLOR\(([A-Z]+)\)/gi, (_, name) => {
+
+    text = text.replace(/COLOR\(([A-Z_]+)\)/gi, (_, name) => {
         const entry = Object.entries(colorMap).find(([k, v]) => v === name.toUpperCase());
         return entry ? `$${entry[0]}` : `COLOR(${name})`;
     });
+
+    text = text.replace(/CUSTOM\(CUSTOM_HEXCOLOR,\s*([A-Z0-9_]+)\)/gi, (_, name) => {
+        const entry = Object.entries(colorMap).find(([k, v]) => v === name.toUpperCase());
+        return entry ? `$${entry[0]}` : `CUSTOM(CUSTOM_HEXCOLOR, ${name})`;
+    });
+
+    return text;
 }
 
 function processCodeToHtml(code) {
@@ -231,7 +248,7 @@ function processCodeToHtml(code) {
         .replace(/DEFINE_MESSAGE\(.*? /gi, '');
 
 
-    const commandRegex = /COLOR\([A-Z]+\)|CUSTOM\(CUSTOM_(WAVE|SHAKE),\s*"\\x[0-9A-Fa-f]{2}"\)|BOX_BREAK|ITEM_ICON\(\\x[0-9A-Fa-f]{2}\)|SHIFT\(\s*"\\x[0-9A-Fa-f]{2}"\)|TEXTBOX_TYPE_(BLACK|BLUE|WOODEN)|TEXTBOX_POS_(TOP|MIDDLE|BOTTOM|VARIABLE)|\[A\]|\[B\]|\[C-(Left|Up|Down|Right)\]|\\(.*?\\)|"[^"\\]*(?:\\.[^"\\]*)*"/gi;
+    const commandRegex = /COLOR\([A-Z]+\)|CUSTOM\(CUSTOM_(WAVE|SHAKE),\s*"\\x[0-9A-Fa-f]{2}"\)|CUSTOM\(CUSTOM_HEXCOLOR,\s*(?:"(?:\\x[0-9A-Fa-f]{2})+"|[A-Z0-9_]+)\)|BOX_BREAK|ITEM_ICON\(\\x[0-9A-Fa-f]{2}\)|SHIFT\(\s*"\\x[0-9A-Fa-f]{2}"\)|TEXTBOX_TYPE_(BLACK|BLUE|WOODEN)|TEXTBOX_POS_(TOP|MIDDLE|BOTTOM|VARIABLE)|\[A\]|\[B\]|\[C-(Left|Up|Down|Right)\]|\\(.*?\\)|"[^"\\]*(?:\\.[^"\\]*)*"/gi;
     let html = '';
     let pos = 0;
     let inBoxBreak = false;
@@ -283,22 +300,22 @@ function processCodeToHtml(code) {
             if (cmd.startsWith('COLOR(')) {
                 const colName = cmd.slice(6, -1).toUpperCase();
                 const colMap = {
-                RED: 'red',
-                DEFAULT: 'white',
-                ADJUSTABLE: 'lightgreen',
-                BLUE: 'blue',
-                LIGHTBLUE: 'lightblue',
-                PURPLE: 'pink',
-                YELLOW: 'yellow',
-                BLACK: 'black',
-                TOK: '#8aeb44',
-                LYN: '#e03a64',
-                IGA: '#a94deb',
-                OKO: '#7df0c4',
-                RAINBOW: 'transparent',
-                GREY: '#4a4a4a',
-                PLAYER: '#ded649',
-                ORANGE: '#ffd500',
+                    RED: 'red',
+                    DEFAULT: 'white',
+                    ADJUSTABLE: 'lightgreen',
+                    BLUE: 'blue',
+                    LIGHTBLUE: 'lightblue',
+                    PURPLE: 'pink',
+                    YELLOW: 'yellow',
+                    BLACK: 'black',
+                    TOK: '#8aeb44',
+                    LYN: '#e03a64',
+                    IGA: '#a94deb',
+                    OKO: '#7df0c4',
+                    RAINBOW: 'transparent',
+                    GREY: '#4a4a4a',
+                    PLAYER: '#ded649',
+                    ORANGE: '#ffd500',
                 };
                 currentColor = colMap[colName] || 'white';
                 currentExtraClasses = colName === 'RAINBOW' ? ['rainbow-text'] : [];
@@ -310,6 +327,29 @@ function processCodeToHtml(code) {
             } else if (cmd.startsWith('CUSTOM(CUSTOM_SHAKE')) {
                 const hex = cmd.match(/\\x([0-9A-Fa-f]{2})/)[1];
                 activeShake = parseInt(hex, 16);
+                openNewSpan();
+            } else if (cmd.startsWith('CUSTOM(CUSTOM_HEXCOLOR')) {
+                const outer = cmd.match(/CUSTOM\(CUSTOM_HEXCOLOR,\s*(?:"((?:\\x[0-9A-Fa-f]{2})+)"|([A-Z0-9_]+))\)/i);
+                if (!outer) return;
+
+                const byteSequence = outer[1];
+                const name = outer[2];
+
+                if (byteSequence) {
+                    const byteRe = /\\x([0-9A-Fa-f]{2})/g;
+                    const parts = [];
+                    let m;
+                    while ((m = byteRe.exec(byteSequence)) !== null) {
+                        parts.push(m[1]);
+                    }
+
+                    if (parts.length > 0) {
+                        const hex = parts.join('').toUpperCase();
+                        currentColor = `#${hex}`;
+                    }
+                } else if (name) {
+                    currentColor = "#" + hexColors[`${name.replace("HEXCOLOR_", "")}`] ?? null;
+                }
                 openNewSpan();
             } else if (cmd === 'BOX_BREAK') {
                 closeSpan();
@@ -392,53 +432,89 @@ function shakeEndTag(match, p1, offset, string) {
     return "CUSTOM\(CUSTOM_SHAKE, \"\\x" + "00" + "\"\)"; 
 }
 
-function updateEditText() {
-  var scriptInput = document.getElementById("otherinput");
-  var codeOutput = document.getElementById("codeoutput");
+const hexColors = {
+    HOT_PINK: `ff6ed1`
+};
 
-  var text = expandColors(scriptInput.value);
-  codeOutput.value = text
-    .replace(/#B\n/g, 'BOX_BREAK ')
-    .replace(/#QE/g, 'QUICKTEXT_ENABLE')
-    .replace(/#QD/g, 'QUICKTEXT_DISABLE')
-    .replace(/#PE/g, 'PERSISTENT')
-    .replace(/#E/g, 'EVENT')
-    .replace(/#SFX\s([0-9A-Fa-f]{2})/g, sfxTag)
-    .replace(/#S\s([0-9A-Fa-f]{2})/g, shiftTag)
-    .replace(/#I\s([0-9A-Fa-f]{2})/g, iconTag)
-    .replace(/#WAVE\s([a-fA-F0-9]{2})/g, waveTag)
-    .replace(/#WE/g, waveEndTag)
-    .replace(/#SHAKE\s([a-fA-F0-9]{2})/g, shakeTag)
-    .replace(/#SE/g, shakeEndTag)
-    .replace(/#U/g, 'UNSKIPPABLE')
-    .replace(/\\n/g, '')
-    .replace(/\$N/g, '\\n')
-    .replace(/\n/g, '"\\n"');
-    
+function hexColorTag(match, p1, offset, string) { 
+    let color = Object.entries(hexColors).find(([k, v]) => v.toUpperCase() === p1.toUpperCase());
+
+    if (color) {
+        return `CUSTOM\(CUSTOM_HEXCOLOR, HEXCOLOR_${color[0]})`.toUpperCase(); 
+    }
+
+    let r = p1.slice(0, 2);
+    let g = p1.slice(2, 4);
+    let b = p1.slice(4, 6);
+    return `CUSTOM\(CUSTOM_HEXCOLOR, \"\\x${r}\\x${g}\\x${b}\"\)`.replace(/\\x([0-9a-f]{2})/g, (_, hex) => `\\x${hex.toUpperCase()}`);
+}
+
+function updateEditText() {
+    const scriptInput = document.getElementById("otherinput");
+    const codeOutput = document.getElementById("codeoutput");
+
+    let text = expandColors(scriptInput.value);
+
+    text = text
+        .replace(/#B\n/g, 'BOX_BREAK ')
+        .replace(/#QE/g, 'QUICKTEXT_ENABLE')
+        .replace(/#QD/g, 'QUICKTEXT_DISABLE')
+        .replace(/#PE/g, 'PERSISTENT')
+        .replace(/#E/g, 'EVENT')
+        .replace(/#SFX\s([0-9A-Fa-f]{2})/g, sfxTag)
+        .replace(/#S\s([0-9A-Fa-f]{2})/g, shiftTag)
+        .replace(/#I\s([0-9A-Fa-f]{2})/g, iconTag)
+        .replace(/#WAVE\s([0-9A-F0-9]{2})/g, waveTag)
+        .replace(/#WE/g, waveEndTag)
+        .replace(/#SHAKE\s([0-9A-Fa-f]{2})/g, shakeTag)
+        .replace(/#SE/g, shakeEndTag)
+        .replace(/#HEX\s([0-9A-Fa-f]{6})/g, hexColorTag)
+        .replace(/#U/g, 'UNSKIPPABLE')
+        .replace(/\\n/g, '')
+        .replace(/\$N/g, '\\n')
+        .replace(/\n/g, '"\\n"');
+
+    codeOutput.value = text.replace(/"\\n"(?=BOX_BREAK)/g, '');
+
     updateText();
 }
 
 function codeToScript() {
-  var codeInput = document.getElementById("codeoutput");
-  var scriptOutput = document.getElementById("otherinput");
+    var codeInput = document.getElementById("codeoutput");
+    var scriptOutput = document.getElementById("otherinput");
 
-  var text = compressColors(codeInput.value);
+    var text = compressColors(codeInput.value);
 
-  scriptOutput.value = text
-    .replace(/UNSKIPPABLE/gi, '#U')
-    .replace(/EVENT/gi, '#E')
-    .replace(/BOX_BREAK /gi, '#B\n')
-    .replace(/QUICKTEXT_ENABLE/g, '#QE')
-    .replace(/QUICKTEXT_DISABLE/g, '#QD')
-    .replace(/PERSISTENT/g, '#PE')
-    .replace(/ITEM_ICON\(\\x([0-9A-Fa-f]{2})\)/g, '#I $1')
-    .replace(/SFX\(\\x([0-9A-Fa-f]{2})\)/g, '#SFX $1')
-    .replace(/SHIFT\("\\x([0-9A-Fa-f]{2})"\)/g, '#S $1')
-    .replace(/CUSTOM\(CUSTOM_WAVE, "\\x([a-fA-F0-9]{2})"\)/g, '#WAVE $1')
-    .replace(/CUSTOM\(CUSTOM_WAVE, "\\x00"\)/g, '#WE')
-    .replace(/CUSTOM\(CUSTOM_SHAKE, "\\x([a-fA-F0-9]{2})"\)/g, '#SHAKE $1')
-    .replace(/CUSTOM\(CUSTOM_SHAKE, "\\x00"\)/g, '#SE')
-    .replace(/"\\n"/g, '\n');
+    text = text.replace(/(?<!"\n")(?=BOX_BREAK)/g, '"\\n"');
+
+    scriptOutput.value = text
+        .replace(/UNSKIPPABLE/gi, '#U')
+        .replace(/EVENT/gi, '#E')
+        .replace(/BOX_BREAK /gi, '#B\n')
+        .replace(/QUICKTEXT_ENABLE/g, '#QE')
+        .replace(/QUICKTEXT_DISABLE/g, '#QD')
+        .replace(/PERSISTENT/g, '#PE')
+        .replace(/ITEM_ICON\(\\x([0-9A-Fa-f]{2})\)/g, '#I $1')
+        .replace(/SFX\(\\x([0-9A-Fa-f]{2})\)/g, '#SFX $1')
+        .replace(/SHIFT\("\\x([0-9A-Fa-f]{2})"\)/g, '#S $1')
+        .replace(/CUSTOM\(CUSTOM_WAVE, "\\x([a-fA-F0-9]{2})"\)/g, '#WAVE $1')
+        .replace(/CUSTOM\(CUSTOM_WAVE, "\\x00"\)/g, '#WE')
+        .replace(/CUSTOM\(CUSTOM_SHAKE, "\\x([a-fA-F0-9]{2})"\)/g, '#SHAKE $1')
+        .replace(/CUSTOM\(CUSTOM_SHAKE, "\\x00"\)/g, '#SE')
+        .replace(
+            /CUSTOM\(CUSTOM_HEXCOLOR,\s*"((?:\\x[0-9a-fA-F]{2})+)"\)/g,
+            (_, bytes) => {
+                // Extract each byte pair
+                const hex = [...bytes.matchAll(/\\x([0-9a-fA-F]{2})/g)]
+                .map(m => m[1])
+                .join('')
+                .toUpperCase();
+
+                // Return "#HEX #RRGGBB..."
+                return `#HEX ${hex}`;
+            }
+        )
+        .replace(/"\\n"/g, '\n');
 }
 
 function defMsg() {
