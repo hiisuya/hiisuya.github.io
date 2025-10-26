@@ -191,7 +191,6 @@ splitWaveAndShakeLetters();
 requestAnimationFrame(updateWaveAnimation);
 
 const colorMap = {
-    BL: 'BLACK',
     R: 'RED',
     G: 'ADJUSTABLE',
     B: 'BLUE',
@@ -307,7 +306,6 @@ function processCodeToHtml(code) {
                     LIGHTBLUE: 'lightblue',
                     PURPLE: 'pink',
                     YELLOW: 'yellow',
-                    BLACK: 'black',
                     TOK: '#8aeb44',
                     LYN: '#e03a64',
                     IGA: '#a94deb',
