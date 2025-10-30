@@ -206,7 +206,8 @@ const colorMap = {
     GR: 'GREY',
     PLAYER: 'PLAYER',
     O: 'ORANGE',
-    HP: 'HEXCOLOR_HOT_PINK'
+    HP: 'HEXCOLOR_HOT_PINK',
+    ANOUKI: 'HEXCOLOR_ANOUKI'
 };
 
 function expandColors(text) {
@@ -431,7 +432,8 @@ function shakeEndTag(match, p1, offset, string) {
 }
 
 const hexColors = {
-    HOT_PINK: `ff6ed1`
+    HOT_PINK: `ff6ed1`,
+    ANOUKI: `44b882`
 };
 
 function hexColorTag(match, p1, offset, string) { 
